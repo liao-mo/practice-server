@@ -35,4 +35,40 @@ router.get("/users/me", auth, async (req, res) => {
   res.send(req.user);
 });
 
+//logout user
+router.post("/users/logout", auth, async (req, res) => {
+  try {
+    //remove token
+    req.user.tokens = req.user.tokens.filter(
+      (token) => token.token != req.token
+    );
+    await req.user.save();
+    res.send();
+  } catch (error) {
+    res.status(500).send(error);
+  }
+});
+
+//update user profile
+router.patch("/users/me", auth, async (req, res) => {
+  //check whether the update fields are valid
+  const updates = Object.keys(req.body);
+  const validUpdates = ["name", "email", "age", "password"];
+  const isValidUpdate = updates.every((update) =>
+    validUpdates.includes(update)
+  );
+  if (!isValidUpdate) {
+    res.status(400).send({ error: "Invalid updates!" });
+  }
+
+  //update user object and save
+  try {
+    updates.forEach((update) => (req.user[update] = req.body[update]));
+    await req.user.save();
+    res.send(req.user);
+  } catch (error) {
+    res.status(400).send(error);
+  }
+});
+
 module.exports = router;
