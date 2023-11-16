@@ -79,7 +79,7 @@ router.patch("/tasks/:id", auth, async (req, res) => {
       owner: req.user._id,
     });
     if (!task) {
-      return res.status(404).send();
+      return res.status(404).send({ error: "Task not found!" });
     }
 
     updates.forEach((update) => (task[update] = req.body[update]));
